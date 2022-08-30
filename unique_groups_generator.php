@@ -6,7 +6,7 @@
  * 2. Set GROUP_SIZE to any number you need (number should not exceed people count).
  * 3. Execute and get list of groups ordered from biggest to smallest sizes.
  *
- * Can be tested in sandbox here: https://onlinephp.io/c/31188
+ * Can be tested in sandbox here: https://onlinephp.io/c/67e78
 */
 class Grouping
 {
@@ -44,7 +44,10 @@ class Grouping
 
     private function groupRandomPeople(): void
     {
-        foreach (self::PEOPLE as $human) {
+    	$people = self::PEOPLE;
+    	shuffle($people);
+    	
+        foreach ($people as $human) {
             if (array_key_exists($human, $this->fullyPaired) && count($this->pairedPeople[$human]) === count(self::PEOPLE) - 1) {
                 $fullyPaired[$human] = true;
 
