@@ -6,9 +6,9 @@
  * 2. Set GROUP_SIZE to any number you need (number should not exceed people count).
  * 3. Execute and get list of groups ordered from biggest to smallest sizes.
  *
- * Can be tested in sandbox here: https://onlinephp.io/c/67e78
+ * Can be tested in sandbox here: https://onlinephp.io/c/a5997
 */
-class Grouping
+Class Grouping
 {
     private const PEOPLE = [
         'Jim Beam',
@@ -25,11 +25,12 @@ class Grouping
         'Rooster Rojo',
     ];
 
-    private const GROUP_SIZE = 3;
+    private const GROUP_SIZE = 4;
 
     private array $pairedPeople = [];
     private array $fullyPaired = [];
     private array $groups = [];
+    private array $groupsOfGroups = [];
 
     public function group(): void
     {
@@ -38,8 +39,12 @@ class Grouping
         } while (!$this->areAllPeoplePaired());
 
         $this->orderGroupsByTotals();
+        
+        do {
+        	$this->groupGroups();
+        } while (count($this->groups) > 0);
 
-        $this->printGroupsList();
+        $this->printGroupsOfGroups();
     }
 
     private function groupRandomPeople(): void
@@ -154,13 +159,64 @@ class Grouping
 
         $this->groups = array_values($mergedOrderedGroups);
     }
-
-    private function printGroupsList(): void
+    
+    private function groupGroups(): void
     {
-        foreach ($this->groups as $key => $group) {
+    	$index = count($this->groupsOfGroups);
+    	$this->groupsOfGroups[$index] = [];
+    	
+    	foreach ($this->groups as $key => $group) {
+    		if ($this->isAnyPersonFromGroupIncludedToGroupOfGroups($group, $this->groupsOfGroups[$index]) === true) {
+    			continue;
+    		}
+    		
+    		$this->groupsOfGroups[$index][] = $group;
+    		unset($this->groups[$key]);
+    	}
+    	
+    	if (count($this->groupsOfGroups[$index]) === 0) {
+    		var_dump('fail'); exit;
+    	}
+    }
+    
+    private function isAnyPersonFromGroupIncludedToGroupOfGroups(array $group, array $groupsOfGroups): bool
+    {
+    	foreach ($groupsOfGroups as $subGroup) {
+    		foreach ($group as $human) {
+    			if (in_array($human, $subGroup, true)) {
+    				return true;
+    			}
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    private function printGroupsOfGroups(): void
+    {
+    	foreach ($this->groupsOfGroups as $key => $groupOfGroups) {
+    		echo sprintf("GROUP OF GROUPS #%d:\n", $key + 1);
+    		
+			$this->printGroupsList($groupOfGroups, true);
+    	}
+    }
+
+    private function printGroupsList(array $groups = null, bool $isSubGroup = false): void
+    {
+    	$groups ??= $this->groups;
+    	
+    	foreach ($groups as $key => $group) {
+        	if ($isSubGroup === true) {
+        		echo '  ';
+        	}
+        	
             echo sprintf("GROUP #%d:\n", $key + 1);
 
             foreach ($group as $human) {
+            	if ($isSubGroup === true) {
+	        		echo '  ';
+	        	}
+	        	
                 echo sprintf("- %s\n", $human);
             }
 
